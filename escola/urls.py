@@ -14,8 +14,12 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('auth/', include('rest_framework.urls'))  # URI utilizada para autenticar usuário para as configurações
+                                                   # de authentication definidas nas settings DRF. Caso não esteja
+                                                   # logado, o user irá apenas conseguir ler.
+                                                   # P/ acessar essa página de login, é url/uri/login
 ]
