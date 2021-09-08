@@ -1,8 +1,14 @@
-from rest_framework import generics
+from rest_framework import generics, viewsets, mixins
+from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
+from rest_framework.response import Response
 
 from .models import *
 from .serializers import *
+
+"""
+    V1 da API
+"""
 
 
 class CursosAPIView(generics.ListCreateAPIView):  # o ListCreate serve para listar uma sequência de itens do db
@@ -36,3 +42,43 @@ class AvaliacaoAPIView(generics.RetrieveUpdateDestroyAPIView):
                                      pk=self.kwargs.get('avaliacao_pk'))
         return get_object_or_404(self.get_queryset(),
                                  pk=self.kwargs.get('avaliacao_pk'))
+
+
+"""
+    V2 da API
+"""
+
+
+class CursoViewSet(viewsets.ModelViewSet):
+    queryset = Curso.objects.all()
+    serializer_class = CursoSerializer
+
+    @action(detail=True, methods=['get'])
+    def avaliacoes(self, request, pk=None):
+        curso = self.get_object()
+        serializer = AvaliacaoSerializer(curso.avaliacoes.all(), many=True)
+        return Response(serializer.data)
+
+
+"""
+Modo mais rápido para a criação, com todos os métodos disponíveis:
+class AvaliacaoViewSet(viewsets.ModelViewSet):
+    queryset = Avaliacao.objects.all()
+    serializer_class = AvaliacaoSerializer
+"""
+
+
+# Neste modo, adicionam-se todas as propriedades do ModelViewSet, mas agora é possível manipular fácilmente quais verbos
+# podem ser usados na View;
+# Por exemplo, se remover a classe ListModelMixin, não será mais possível listar todas as avaliações na URI
+# api/V2/avaliacoes, se remover o DestroyModelMixin, ninguém teria a permissão de deletar a Avaliação
+class AvaliacaoViewSet(
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet
+):
+    queryset = Avaliacao.objects.all()
+    serializer_class = AvaliacaoSerializer
