@@ -7,7 +7,7 @@ class AvaliacaoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Avaliacao
-        fieds = (  # Atributos a serem salvos em JSON e traduzidos pelo serializer
+        fields = (  # Atributos a serem salvos em JSON e traduzidos pelo serializer
             'id',
             'curso',
             'nome',

@@ -1,26 +1,38 @@
-from rest_framework.response import Response
-from rest_framework.views import APIView
+from rest_framework import generics
+from rest_framework.generics import get_object_or_404
 
-from .models import Curso, Avaliacao
-from .serializers import CursoSerializer, AvaliacaoSerializer
-
-
-class CursoAPIView(APIView):
-    # A string abaixo serve de título para a página
-    """
-    API dos Cursos
-    """
-    def get(self, request):  # Função do verbo GET
-        cursos = Curso.objects.all()
-        serializer = CursoSerializer(cursos, many=True)
-        return Response(serializer.data, template_name='cursos')
+from .models import *
+from .serializers import *
 
 
-class AvaliacaoAPIView(APIView):
-    """
-    API das Avaliações
-    """
-    def get(self):
-        avaliacoes = Avaliacao.objects.all()
-        serializer = AvaliacaoSerializer(avaliacoes, many=True).data
-        return Response(serializer, template_name='avaliacoes')
+class CursosAPIView(generics.ListCreateAPIView):  # o ListCreate serve para listar uma sequência de itens do db
+    queryset = Curso.objects.all()
+    serializer_class = CursoSerializer
+
+
+class CursoAPIView(generics.RetrieveUpdateDestroyAPIView):  # Já este argumento permite a modificação de um UNICO objeto
+    queryset = Curso.objects.all()
+    serializer_class = CursoSerializer
+
+
+class AvaliacoesAPIView(generics.ListCreateAPIView):
+    queryset = Avaliacao.objects.all()
+    serializer_class = AvaliacaoSerializer
+
+    def get_queryset(self):
+        if self.kwargs.get('curso_pk'):
+            return self.queryset.filter(curso_id=self.kwargs.get('curso_pk'))
+        return self.queryset.all()
+
+
+class AvaliacaoAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Avaliacao.objects.all()
+    serializer_class = AvaliacaoSerializer
+
+    def get_object(self):
+        if self.kwargs.get('curso_pk'):
+            return get_object_or_404(self.get_queryset(),
+                                     curso_id=self.kwargs.get('curso_pk'),
+                                     pk=self.kwargs.get('avaliacao_pk'))
+        return get_object_or_404(self.get_queryset(),
+                                 pk=self.kwargs.get('avaliacao_pk'))
