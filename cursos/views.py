@@ -1,9 +1,10 @@
-from rest_framework import generics, viewsets, mixins
+from django.core.exceptions import BadRequest
+from rest_framework import generics, viewsets, mixins, status
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
-from .models import *
 from .serializers import *
 
 """
@@ -59,6 +60,13 @@ class CursoViewSet(viewsets.ModelViewSet):
         serializer = AvaliacaoSerializer(curso.avaliacoes.all(), many=True)
         return Response(serializer.data)
 
+    # def create(self, request, *args, **kwargs):
+    #     serializer = self.get_serializer(data=request.data)
+    #
+    #     serializer.is_valid(raise_exception=True)
+    #     self.perform_create(serializer)
+    #     headers = self.get_success_headers(serializer.data)
+    #     return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 """
 Modo mais rápido para a criação, com todos os métodos disponíveis:
