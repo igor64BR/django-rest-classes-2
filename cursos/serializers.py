@@ -1,3 +1,4 @@
+from django.db.models import Avg
 from rest_framework import serializers
 
 from cursos.models import *
@@ -72,14 +73,14 @@ class CursoSerializer(serializers.ModelSerializer):  # No fim, essa classe irá 
         many=True,
         read_only=True,
     )
-    """ 
+    """
     avaliacoes = serializers.StringRelatedField(  # Lista a partir da fun. __str__ do model
         many=True,
         read_only=True
     )
+    media_avaliacoes = serializers.SerializerMethodField()  # Calcular média das avaliações
 
     # Obs: Usar este no desafio para listar os organizadores
-
     class Meta:
         model = Curso
         fields = (
@@ -89,6 +90,14 @@ class CursoSerializer(serializers.ModelSerializer):  # No fim, essa classe irá 
             'criado',
             'modificado',
             'ativo',
-            'avaliacoes'
+            'avaliacoes',
+            'media_avaliacoes'
         )
 
+    def get_media_avaliacoes(self, obj):  # Obj, no caso, são todos os objetos dessa classe CursoSerializer
+        media = obj.avaliacoes.aggregate(Avg('aval')).get('aval__avg')
+
+        if media is None:
+            return 0
+        else:
+            return round(media * 10) / 10
