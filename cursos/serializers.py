@@ -20,12 +20,37 @@ class AvaliacaoSerializer(serializers.ModelSerializer):
             'email': {'write_only': True}  # Protec. de Priv.: Não mostrar o email, quando o JSON for solicitado
                                            # Desta forma, evita empresas enviarem spams para o email do usuário
         }
-
+    """
     def validate_aval(self, valor):
         if 1 <= valor <= 5:
             return valor
         else:
             raise serializers.ValidationError('Avaliação deve ser entre 1 e 5')
+    """
+
+    def validate(self, data):  # É neste modelo que será feita a validação de erros
+        success = True
+        errormessages = []
+        fields = [e for e in data]
+        print(fields)
+        for field in fields:
+            if len(str(data[field])) == 0:
+                success = False
+                errormessages.append(f'{field} não pode estar em branco')
+
+        if (len(data['aval']) == 1 and '.' not in data['aval']) \
+                or \
+                (len(data['aval']) == 3 and '.' in data['aval']):
+            if not 1 <= float(data['aval']) <= 5:
+                errormessages.append('Avaliação deve ser entre 1 e 5')
+                success = False
+        else:
+            errormessages.append('Avaliação necessita de um valor válido')
+
+        if success:
+            return data
+        else:
+            raise serializers.ValidationError(errormessages)
 
 
 class CursoSerializer(serializers.ModelSerializer):  # No fim, essa classe irá JSONar os dados requeridos

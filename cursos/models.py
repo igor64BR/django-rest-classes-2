@@ -10,6 +10,7 @@ class Base(models.Model):
         abstract = True
         # A classe é abstrata para que não possa ser considerada como um Model, ou seja, só servirá como base para
         # demais modelos futuros. Dessa forma, não poderá ser criado um Form baseado na class Base
+        ordering = ['id']  # Ordena de forma crescente
 
 
 class Curso(Base):
@@ -19,6 +20,7 @@ class Curso(Base):
     class Meta:                         # Opc.; Adiciona metadados, ou seja, atributos a serem lidos apenas pela
         verbose_name = 'Curso'          # Framework, sem se tornar parte do formulário
         verbose_name_plural = 'Cursos'  # (https://docs.djangoproject.com/en/dev/topics/db/models/#meta-options)
+        ordering = ['-id']  # Ordena de forma decrescente
 
     def __str__(self):
         return self.curso
@@ -27,8 +29,9 @@ class Curso(Base):
 class Avaliacao(Base):
     curso = models.ForeignKey(to=Curso, on_delete=models.CASCADE, related_name='avaliacoes')
     nome = models.CharField(max_length=100, blank=True)
-    email = models.EmailField(max_length=100)
-    aval = models.DecimalField(max_digits=2, decimal_places=1)
+    email = models.EmailField(max_length=100, blank=True)
+    # aval = models.DecimalField(max_digits=2, decimal_places=1)
+    aval = models.CharField(max_length=2, blank=True)
     comentario = models.TextField(max_length=500, blank=True, default='')
 
     class Meta:

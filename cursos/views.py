@@ -54,10 +54,18 @@ class CursoViewSet(viewsets.ModelViewSet):
     queryset = Curso.objects.all()
     serializer_class = CursoSerializer
 
-    @action(detail=True, methods=['get'])
+    @action(detail=True, methods=['get'])  # Apesar de configurado, a set de paginção não afeta as actions das ViewSets
     def avaliacoes(self, request, pk=None):
+        self.pagination_class.page_size = 2                      # define o número de itens paginados
+        avaliacoes = Avaliacao.objects.filter(curso_id=pk)
+        page = self.paginate_queryset(queryset=avaliacoes)       # Define o queryset para ser paginado
+
+        if page is not None:                                     # Se o queryset paginado não for vazio,
+            serializer = AvaliacaoSerializer(page, many=True)    # serialize o queryset, com vários elementos
+            return self.get_paginated_response(serializer.data)  # E retorne a Response padrão do módulo da paginação
+
         curso = self.get_object()
-        serializer = AvaliacaoSerializer(curso.avaliacoes.all(), many=True)
+        serializer = AvaliacaoSerializer(avaliacoes, many=True)
         return Response(serializer.data)
 
     # def create(self, request, *args, **kwargs):
