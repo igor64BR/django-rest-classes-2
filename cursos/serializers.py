@@ -59,7 +59,6 @@ class CursoSerializer(serializers.ModelSerializer):  # No fim, essa classe irá 
     avaliacoes = AvaliacaoSerializer(many=True, read_only=True)  # Adiciona uma lista nos cursos de todas as avaliações
                                                                  # daquele curso, com todos os detalhes
     """
-
     """
     # Hiyperlinked Related Field
     avaliacoes = serializers.HyperlinkedRelatedField(  # Apresenta uma lista com os links para acessar os itens a partir
@@ -73,8 +72,7 @@ class CursoSerializer(serializers.ModelSerializer):  # No fim, essa classe irá 
         many=True,
         read_only=True,
     )
-    """
-
+    """ 
     avaliacoes = serializers.StringRelatedField(  # Lista a partir da fun. __str__ do model
         many=True,
         read_only=True

@@ -1,12 +1,13 @@
 from django.core.exceptions import BadRequest
-from rest_framework import generics, viewsets, mixins, status
+from rest_framework import generics, viewsets, mixins, status, permissions
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
+from rest_framework.throttling import UserRateThrottle
 from rest_framework.views import APIView
 
+from .permissions import IsSuperUser
 from .serializers import *
-
 """
     V1 da API
 """
@@ -51,8 +52,11 @@ class AvaliacaoAPIView(generics.RetrieveUpdateDestroyAPIView):
 
 
 class CursoViewSet(viewsets.ModelViewSet):
+    throttle_classes = [UserRateThrottle]
     queryset = Curso.objects.all()
     serializer_class = CursoSerializer
+    permission_classes = (IsSuperUser, )  # Caso tenha mais de uma classe de permissão, será seguida a ordem no tuple
+    #                                     # até que a permissão seja resolvida ou que todos acabem
 
     @action(detail=True, methods=['get'])  # Apesar de configurado, a set de paginção não afeta as actions das ViewSets
     def avaliacoes(self, request, pk=None):
@@ -67,6 +71,11 @@ class CursoViewSet(viewsets.ModelViewSet):
         curso = self.get_object()
         serializer = AvaliacaoSerializer(avaliacoes, many=True)
         return Response(serializer.data)
+
+    # @action(detail=True, methods=['*'], throttle_classes=[UserRateThrottle])
+    # def t
+
+
 
     # def create(self, request, *args, **kwargs):
     #     serializer = self.get_serializer(data=request.data)
@@ -98,3 +107,6 @@ class AvaliacaoViewSet(
 ):
     queryset = Avaliacao.objects.all()
     serializer_class = AvaliacaoSerializer
+    permission_classes = (permissions.DjangoModelPermissions, )  # Apenas pessoal autenticado pode acessar, mesmo que
+    #                                                            # sem permissões de staff ou superuser
+
